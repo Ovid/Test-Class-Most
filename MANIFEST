@@ -1,0 +1,17 @@
+Build.PL
+Changes
+lib/Test/Class/Most.pm
+Makefile.PL
+MANIFEST
+META.yml
+README
+t/basic.t
+t/lib/My/Test/Class.pm
+t/lib/My/Test/Class/Child.pm
+t/lib/My/Test/Class/Child/Grandchild.pm
+t/lib/My/Test/Class/Child/ISuckAtOO.pm
+t/lib/My/Test/Class/Child2.pm
+t/lib/My/Test/ClassNoFeature.pm
+t/lib/My/Test/ClassNoFeatureChild.pm
+xt/pod-coverage.t
+xt/pod.t

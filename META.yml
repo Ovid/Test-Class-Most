@@ -1,0 +1,22 @@
+---
+abstract: 'Test Classes the easy way'
+author:
+  - "Curtis \"Ovid\" Poe <ovid@cpan.org>"
+configure_requires:
+  Module::Build: 0.36
+generated_by: 'Module::Build version 0.3601'
+license: perl
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
+name: Test-Class-Most
+provides:
+  Test::Class::Most:
+    file: lib/Test/Class/Most.pm
+    version: 0.01
+requires:
+  Test::Class: 0.33
+  Test::Most: 0.21
+resources:
+  license: http://dev.perl.org/licenses/
+version: 0.01
