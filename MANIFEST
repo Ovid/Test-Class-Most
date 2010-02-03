@@ -5,7 +5,7 @@ Makefile.PL
 MANIFEST
 META.yml
 README
-t/basic.t
+t/test_class_load.t
 t/lib/My/Test/Class.pm
 t/lib/My/Test/Class/Child.pm
 t/lib/My/Test/Class/Child/Grandchild.pm

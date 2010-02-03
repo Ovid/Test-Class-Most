@@ -25,7 +25,7 @@ sub sanity : Tests(3) {
         eval "say '# ignore this diagnostic message'";
         my $error = $@;
         ok !$error, '5.10 automatically imports features'
-          or diag explain $error;
+          or diag $error;
     }
 }
 

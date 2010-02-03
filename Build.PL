@@ -11,6 +11,10 @@ my $builder = Module::Build->new(
         'Test::Most'  => 0.21,
         'Test::Class' => 0.33,
     },
+    meta_merge        => {
+        resources =>
+          { repository => 'http://github.com/Ovid/Test-Class-Most/', },
+    },
     add_to_cleanup     => ['Test-Class-Most-*'],
     create_makefile_pl => 'traditional',
 );
