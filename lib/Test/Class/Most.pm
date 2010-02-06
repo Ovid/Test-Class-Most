@@ -5,40 +5,40 @@ use strict;
 use Test::Class;
 use Carp 'croak';
 
-my ( $HAVE510, $HAVEFEATURE, $HAVEMRO );
-
-BEGIN {
-    $HAVE510 = $] >= 5.010000;
-    if ($HAVE510) {
-
-        # if we get to here, eval really shouldn't be needed, should it?
-        eval "use feature ()";
-        $HAVEFEATURE = 1 unless $@;
-        eval "use mro ()";
-        $HAVEMRO = 1 unless $@;
-    }
-}
-
 =head1 NAME
 
 Test::Class::Most - Test Classes the easy way
 
 =head1 VERSION
 
-Version 0.02
+Version 0.04
 
 =cut
 
-our $VERSION = '0.02';
+our $VERSION = '0.04';
 $VERSION = eval $VERSION;
 
 =head1 SYNOPSIS
 
+Instead of this:
+
+    use strict;
+    use warnings;
+    use Test::Exception 0.88;
+    use Test::Differences 0.500;
+    use Test::Deep 0.106;
+    use Test::Warn 0.11;
+    use Test::More 0.88;
+
+    use parent 'My::Test::Class';
+
+    sub some_test : Tests { ... }
+
+You type this:
+
     use Test::Class::Most parent => 'My::Test::Class';
 
-    sub teststuff : Tests {
-        ok 1;  # All Test::Most functions exported
-    }
+    sub some_test : Tests { ... }
 
 =head1 DESCRIPTION
 
@@ -77,11 +77,7 @@ this:
   use Test::Class::Most parent => 'My::Test::Class';
 
 That automatically imports L<strict> and L<warnings> for you.  It also gives
-you all of the testing goodness from L<Test::Most>.  As an added bonus, if you
-have 5.10 or greater, you automatically get I<all> the new 5.10 features
-enabled, along with the c3 MRO.  Unless you don't want them:
-
-  use Test::Class::Most feature => 0;
+you all of the testing goodness from L<Test::Most>.
 
 =head1 CREATING YOUR OWN BASE CLASS
 
@@ -146,15 +142,6 @@ sub import {
         no strict 'refs';
         push @{"${caller}::ISA"} => 'Test::Class';
     }
-    return unless $HAVE510;
-    if ( exists $args{feature} && !$args{feature} ) {
-
-        # the cheap way of shutting it off
-        $HAVE510 = 0;
-        return;
-    }
-    feature->import(':5.10') if $HAVEFEATURE;
-    mro::set_mro( scalar caller(), 'c3' ) if $HAVEMRO;
 }
 
 =head1 AUTHOR

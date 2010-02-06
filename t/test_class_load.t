@@ -1,5 +1,3 @@
-#!/usr/bin/env perl
-
 BEGIN {
     $SIG{__WARN__} = sub {
         my $warning = shift;

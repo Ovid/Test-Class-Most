@@ -1,5 +1,15 @@
 Revision history for Test-Class-Most
 
+0.04    February 6, 2010
+        - Removed all trace of "feature" and "mro" handling.  This is because
+          it turns out to be fraught with error (what happens if your
+          inheritance heirarchy tries to use different MROs in different
+          classes? You should not be using multiple inheritance anyway!
+
+0.03    February 4, 2010
+        - Remove bad shebang causing some tests to fail if /usr/bin/env picks
+          up a perl not in their path.
+
 0.02    February 3, 2010
         - Fix a broken diagnostic message in t/lib/My/Test/Class.pm
         - Correct the MANIFEST for a renamed file.
