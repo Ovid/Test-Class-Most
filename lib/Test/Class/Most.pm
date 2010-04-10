@@ -15,7 +15,7 @@ Version 0.04
 
 =cut
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 $VERSION = eval $VERSION;
 
 =head1 SYNOPSIS
@@ -41,22 +41,6 @@ You type this:
     sub some_test : Tests { ... }
 
 =head1 DESCRIPTION
-
-If you're not familiar with using L<Test::Class>, please see my tutorial at:
-
-=over 4
-
-=item * L<http://www.modernperlbooks.com/mt/2009/03/organizing-test-suites-with-testclass.html>
-
-=item * L<http://www.modernperlbooks.com/mt/2009/03/reusing-test-code-with-testclass.html>
-
-=item * L<http://www.modernperlbooks.com/mt/2009/03/making-your-testing-life-easier.html>
-
-=item * L<http://www.modernperlbooks.com/mt/2009/03/using-test-control-methods-with-testclass.html>
-
-=item * L<http://www.modernperlbooks.com/mt/2009/03/working-with-testclass-test-suites.html>
-
-=back
 
 When people write test classes with the excellent C<Test::Class>, you often
 see the following at the top of the code:
@@ -112,6 +96,58 @@ figured I shouldn't force too many of my personal beliefs on you):
     Some::Other::Class::For::Increased::Stupidity
  /];
 
+As a side note, it's recommended that even if you don't need test control
+methods in your base class, put stubs in there:
+
+  package My::Test::Class;
+  use Test::Class::Most; # we now inherit from Test::Class
+
+  INIT { Test::Class->runtests }
+
+  sub startup  : Tests(startup)  {}
+  sub setup    : Tests(setup)    {}
+  sub teardown : Tests(teardown) {}
+  sub shutdown : Tests(shutdown) {}
+
+  1;
+
+This allows developers to I<always> be able to safely call parent test control
+methods rather than wonder if they are there:
+
+  package Tests::For::Customer;
+  use Test::Class::Most parent => 'My::Test::Class';
+
+  sub setup : Tests(setup) {
+    my $test = shift;
+    $test->next::method; # safe due to stub in base class
+    ...
+  }
+
+=head1 ATTRIBUTES
+
+You can also specify "attributes" which are merely very simple getter/setters.
+
+  use Test::Class::Most 
+    parent     => 'My::Test::Class',
+    attributes => [qw/customer items/];
+
+  sub setup : Tests(setup) {
+    my $test = shift;
+    $test->SUPER::setup;
+    $test->customer( ... );
+    $test->items( ... );
+  }
+
+  sub some_tests : Tests {
+    my $test     = shift;
+    my $customer = $test->customer;
+    ...
+  }
+
+If called with no arguments, returns the current value.  If called with one
+argument, sets that argument as the current value.  If called with more than
+one argument, it croaks.
+
 =head1 EXPORT
 
 All functions from L<Test::Most> are automatically exported into your
@@ -142,7 +178,47 @@ sub import {
         no strict 'refs';
         push @{"${caller}::ISA"} => 'Test::Class';
     }
+    if ( my $attributes = delete $args{attributes} ) {
+        if ( ref $attributes && 'ARRAY' ne ref $attributes ) {
+            croak(
+"Argument to 'attributes' must be a classname or array of classnames, not ($attributes)"
+            );
+        }
+        $attributes = [$attributes] unless ref $attributes;
+        foreach my $attr (@$attributes) {
+            my $method = "$caller\::$attr";
+            no strict 'refs';
+            *$method = sub {
+                my $test = shift;
+                return $test->{$method} unless @_;
+                if ( @_ > 1 ) {
+                    croak("You may not pass more than one argument to '$method'");
+                }
+                $test->{$method} = shift;
+                return $test;
+            };
+        }
+    }
 }
+
+=head1 TUTORIAL
+
+If you're not familiar with using L<Test::Class>, please see my tutorial at:
+
+=over 4
+
+=item * L<http://www.modernperlbooks.com/mt/2009/03/organizing-test-suites-with-testclass.html>
+
+=item * L<http://www.modernperlbooks.com/mt/2009/03/reusing-test-code-with-testclass.html>
+
+=item * L<http://www.modernperlbooks.com/mt/2009/03/making-your-testing-life-easier.html>
+
+=item * L<http://www.modernperlbooks.com/mt/2009/03/using-test-control-methods-with-testclass.html>
+
+=item * L<http://www.modernperlbooks.com/mt/2009/03/working-with-testclass-test-suites.html>
+
+=back
+
 
 =head1 AUTHOR
 
@@ -218,4 +294,5 @@ under the same terms as Perl itself.
 
 =cut
 
-"Boilerplate it bad, m'kay";
+no warnings 'void';
+"Boilerplate is bad, m'kay";

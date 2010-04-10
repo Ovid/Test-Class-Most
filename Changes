@@ -1,5 +1,10 @@
 Revision history for Test-Class-Most
 
+0.05    April 10, 2010
+        - Extended and reorganized the documentation.
+        - Add 'attributes' to Test::Class::Most.
+          http://blogs.perl.org/users/ovid/2010/04/vienna-perl-qa-hackathon-day-1.html
+
 0.04    February 6, 2010
         - Removed all trace of "feature" and "mro" handling.  This is because
           it turns out to be fraught with error (what happens if your
