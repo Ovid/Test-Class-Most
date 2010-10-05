@@ -169,8 +169,10 @@ sub import {
             );
         }
         $parent = [$parent] unless ref $parent;
-        eval "use $_" foreach @$parent;
-        croak($@) if $@;
+        foreach my $p (@$parent) {
+            eval "use $p";
+            croak($@) if $@;
+        }
         no strict 'refs';
         push @{"${caller}::ISA"} => @$parent;
     }
