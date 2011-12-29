@@ -1,5 +1,8 @@
 Revision history for Test-Class-Most
 
+0.06    December 29, 2011
+        - Added is_abstract property.
+
 0.05    April 10, 2010
         - Extended and reorganized the documentation.
         - Add 'attributes' to Test::Class::Most.
