@@ -13,3 +13,4 @@ t/lib/My/Test/Class/Child/ISuckAtOO.pm
 t/lib/My/Test/Class/Child2.pm
 xt/pod-coverage.t
 xt/pod.t
+META.json
