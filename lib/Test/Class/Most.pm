@@ -11,11 +11,11 @@ Test::Class::Most - Test Classes the easy way
 
 =head1 VERSION
 
-Version 0.04
+Version 0.06
 
 =cut
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 $VERSION = eval $VERSION;
 
 =head1 SYNOPSIS
@@ -128,8 +128,9 @@ methods rather than wonder if they are there:
 You can also specify "attributes" which are merely very simple getter/setters.
 
   use Test::Class::Most 
-    parent     => 'My::Test::Class',
-    attributes => [qw/customer items/];
+    parent      => 'My::Test::Class',
+    attributes  => [qw/customer items/],
+    is_abstract => 1;
 
   sub setup : Tests(setup) {
     my $test = shift;
@@ -148,6 +149,37 @@ If called with no arguments, returns the current value.  If called with one
 argument, sets that argument as the current value.  If called with more than
 one argument, it croaks.
 
+=head1 ABSTRACT CLASSES
+
+You may pass an optional C<is_abstract> parameter in the import list. It takes
+a boolean value. This value is advisory only and is not inherited. It defaults
+to false if not provided.
+
+Sometimes you want to identify a test class as "abstract". It may have a bunch
+of tests, but those should only run for its subclasses. You can pass
+C<<is_abstract => 1>> in the import list. Then, to test if a given class or
+instance of that class is "abstract":
+
+ sub dont_run_in_abstract_base_class : Tests {
+     my $test = shift;
+     return if Test::Class::Most->is_abstract($test);
+     ...
+ }
+
+Note that C<is_abstract> is strictly B<advisory only>. You are expected
+(required) to check the value yourself and take appropriate action.
+
+We recommend adding the following method to your base class:
+
+ sub is_abstract {
+     my $test = shift;
+     return Test::Class::Most->is_abstract($test);
+ }
+
+And later in a subclass:
+
+ if ( $test->is_abstract ) { ... }
+
 =head1 EXPORT
 
 All functions from L<Test::Most> are automatically exported into your
@@ -155,50 +187,66 @@ namespace.
 
 =cut
 
-sub import {
-    my ( $class, %args ) = @_;
-    my $caller = caller;
-    eval "package $caller; use Test::Most;";
-    croak($@) if $@;
-    warnings->import;
-    strict->import;
-    if ( my $parent = delete $args{parent} ) {
-        if ( ref $parent && 'ARRAY' ne ref $parent ) {
-            croak(
-"Argument to 'parent' must be a classname or array of classnames, not ($parent)"
-            );
-        }
-        $parent = [$parent] unless ref $parent;
-        foreach my $p (@$parent) {
-            eval "use $p";
-            croak($@) if $@;
-        }
-        no strict 'refs';
-        push @{"${caller}::ISA"} => @$parent;
+{
+    my %IS_ABSTRACT;
+
+    sub is_abstract {
+        my ( undef, $proto ) = @_;
+        my $test_class = ref $proto || $proto;
+        return $IS_ABSTRACT{$test_class};
     }
-    else {
-        no strict 'refs';
-        push @{"${caller}::ISA"} => 'Test::Class';
-    }
-    if ( my $attributes = delete $args{attributes} ) {
-        if ( ref $attributes && 'ARRAY' ne ref $attributes ) {
-            croak(
-"Argument to 'attributes' must be a classname or array of classnames, not ($attributes)"
-            );
-        }
-        $attributes = [$attributes] unless ref $attributes;
-        foreach my $attr (@$attributes) {
-            my $method = "$caller\::$attr";
+
+    sub import {
+        my ( $class, %args ) = @_;
+        my $caller = caller;
+        eval "package $caller; use Test::Most;";
+        croak($@) if $@;
+        warnings->import;
+        strict->import;
+        if ( my $parent = delete $args{parent} ) {
+            if ( ref $parent && 'ARRAY' ne ref $parent ) {
+                croak(
+    "Argument to 'parent' must be a classname or array of classnames, not ($parent)"
+                );
+            }
+            $parent = [$parent] unless ref $parent;
+            foreach my $p (@$parent) {
+                eval "use $p";
+                croak($@) if $@;
+            }
             no strict 'refs';
-            *$method = sub {
-                my $test = shift;
-                return $test->{$method} unless @_;
-                if ( @_ > 1 ) {
-                    croak("You may not pass more than one argument to '$method'");
-                }
-                $test->{$method} = shift;
-                return $test;
-            };
+            push @{"${caller}::ISA"} => @$parent;
+        }
+        else {
+            no strict 'refs';
+            push @{"${caller}::ISA"} => 'Test::Class';
+        }
+        if ( my $attributes = delete $args{attributes} ) {
+            if ( ref $attributes && 'ARRAY' ne ref $attributes ) {
+                croak(
+    "Argument to 'attributes' must be a classname or array of classnames, not ($attributes)"
+                );
+            }
+            $attributes = [$attributes] unless ref $attributes;
+            foreach my $attr (@$attributes) {
+                my $method = "$caller\::$attr";
+                no strict 'refs';
+                *$method = sub {
+                    my $test = shift;
+                    return $test->{$method} unless @_;
+                    if ( @_ > 1 ) {
+                        croak("You may not pass more than one argument to '$method'");
+                    }
+                    $test->{$method} = shift;
+                    return $test;
+                };
+            }
+        }
+        if ( my $is_abstract = delete $args{is_abstract} ) {
+            $IS_ABSTRACT{$caller} = $is_abstract;
+        }
+        else {
+            $IS_ABSTRACT{$caller} = 0;
         }
     }
 }
@@ -228,19 +276,17 @@ Curtis "Ovid" Poe, C<< <ovid at cpan.org> >>
 
 =head1 BUGS
 
-Please report any bugs or feature requests to C<bug-test-class-most at rt.cpan.org>, or through
-the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Test-Class-Most>.  I will be notified, and then you'll
-automatically be notified of progress on your bug as I make changes.
-
-
-
+Please report any bugs or feature requests to C<bug-test-class-most at
+rt.cpan.org>, or through the web interface at
+L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Test-Class-Most>.  I will be
+notified, and then you'll automatically be notified of progress on your bug as
+I make changes.
 
 =head1 SUPPORT
 
 You can find documentation for this module with the perldoc command.
 
     perldoc Test::Class::Most
-
 
 You can also look for information at:
 
@@ -291,8 +337,8 @@ and C<chromatic> for L<Modern::Perl>.
 
 Copyright 2010 Curtis "Ovid" Poe, all rights reserved.
 
-This program is free software; you can redistribute it and/or modify it
-under the same terms as Perl itself.
+This program is free software; you can redistribute it and/or modify it under
+the same terms as Perl itself.
 
 =cut
 

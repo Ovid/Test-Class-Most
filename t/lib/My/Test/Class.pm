@@ -1,6 +1,6 @@
 package My::Test::Class;
 
-use Test::Class::Most;
+use Test::Class::Most is_abstract => 1;
 
 INIT { Test::Class->runtests }
 
@@ -24,6 +24,19 @@ sub sanity : Tests(2) {
     my $error = $@;
     like $error, qr/^Global symbol "\$foo" requires explicit package name/,
       '... and we should automatically have strict turned on';
+}
+
+sub is_abstract {
+    my $test = shift;
+    return Test::Class::Most->is_abstract($test);
+}
+
+sub verify_abstract_behavior : Tests(1) {
+    my $test        = shift;
+    my $test_class  = ref $test;
+    my $is_abstract = Test::Class::Most->is_abstract($test_class);
+    my $maybe = $is_abstract ? "" : "not";
+    is $test->is_abstract, $is_abstract, "$test_class should $maybe be abstract";
 }
 
 1;

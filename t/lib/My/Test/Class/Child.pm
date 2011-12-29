@@ -1,8 +1,9 @@
 package My::Test::Class::Child;
 
-use Test::Class::Most 
-    parent     => 'My::Test::Class',
-    attributes => 'child1';
+use Test::Class::Most
+  parent      => 'My::Test::Class',
+  is_abstract => 1,
+  attributes  => 'child1';
 
 sub startup : Tests(startup) {
     my $test = shift;
