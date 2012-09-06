@@ -1,5 +1,9 @@
 Revision history for Test-Class-Most
 
+0.07    September 6, 2012
+        - No functional change. Bump Test::Most dependency to 0.31. This fixes
+          prototype warnings when using Moose.
+
 0.06    December 29, 2011
         - Added is_abstract property.
 

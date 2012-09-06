@@ -8,7 +8,7 @@ my $builder = Module::Build->new(
     dist_author       => 'Curtis "Ovid" Poe <ovid@cpan.org>',
     dist_version_from => 'lib/Test/Class/Most.pm',
     requires          => {
-        'Test::Most'  => 0.21,
+        'Test::Most'  => 0.31,
         'Test::Class' => 0.33,
     },
     meta_merge        => {
