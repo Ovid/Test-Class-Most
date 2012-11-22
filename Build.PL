@@ -9,7 +9,7 @@ my $builder = Module::Build->new(
     dist_version_from => 'lib/Test/Class/Most.pm',
     requires          => {
         'Test::Most'  => 0.31,
-        'Test::Class' => 0.33,
+        'Test::Class' => 0.38,
     },
     meta_merge        => {
         resources =>
